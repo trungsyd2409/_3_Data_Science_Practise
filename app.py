@@ -12,8 +12,10 @@ currencies = get_currencies_list()
 
 
 # If the list of available currencies is None, display an error message in Streamlit App
+# and stop here, since the rest of the app cannot work without a currency list.
 if currencies is None:
     st.error("Error fetching currency list")
+    st.stop()
 
 # Add input fields for capturing amount, from and to currencies
 amount = st.number_input("Amount", value=1.0)
