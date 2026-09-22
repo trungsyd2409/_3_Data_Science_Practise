@@ -13,7 +13,8 @@ def round_rate(rate):
     float
         Rounded rate
     """
-    
+    return round(rate, 4)
+
 
 def reverse_rate(rate):
     """
@@ -32,7 +33,9 @@ def reverse_rate(rate):
     float
         Inverse of input FX conversion rate
     """
-    
+    return round_rate(1 / rate) if rate != 0 else 0
+
+
 def format_output(date, from_currency, to_currency, rate, amount):
     """
     Function that will format the text to be displayed in the Streamlit app.
@@ -55,4 +58,5 @@ def format_output(date, from_currency, to_currency, rate, amount):
     str
         Formatted text for display
     """
-   
+    result = f"The conversion rate on {date} from {from_currency} to {to_currency} was {rate}. So {amount} in {from_currency} correspond to {round_rate(rate * amount)} in {to_currency}. The inverse rate was {reverse_rate(rate)}."
+    return result
