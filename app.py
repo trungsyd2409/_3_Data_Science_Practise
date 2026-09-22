@@ -1,7 +1,7 @@
 import streamlit as st
 import datetime
 
-from frankfurter import get_currencies_list, get_latest_rates, get_historical_rate
+from frankfurter import get_currencies_list, get_latest_rates, get_historical_rate, get_rate_trend
 from currency import reverse_rate, round_rate, format_output
 
 # Display Streamlit App Title
@@ -9,6 +9,7 @@ st.title("FX Converter")
 
 # Get the list of available currencies from Frankfurter
 currencies = get_currencies_list()
+
 
 # If the list of available currencies is None, display an error message in Streamlit App
 if currencies is None:
@@ -30,6 +31,14 @@ if st.button("Get Latest Rate"):
                 date, from_currency, to_currency, rate, amount))
         else:
             st.error("Error fetching latest rate")
+
+        with st.spinner("Fetching rate trend for the last 3 years..."):
+            rate_trend = get_rate_trend(from_currency, to_currency, 3)
+            if rate_trend is not None:
+                st.write(f"Rate Trend for the last 3 years:")
+                st.line_chart(rate_trend)
+            else:
+                st.error("Error fetching rate trend")
 
 # Add a date selector (calendar)
 date = st.date_input("Select Date", value=datetime.date.today(

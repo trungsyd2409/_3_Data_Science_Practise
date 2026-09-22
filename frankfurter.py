@@ -1,6 +1,8 @@
 from api import get_url
 import json
-
+import datetime
+import calendar
+from concurrent.futures import ThreadPoolExecutor, as_completed
 BASE_URL = "https://api.frankfurter.app"
 
 
@@ -52,6 +54,7 @@ def get_latest_rates(from_currency, to_currency, amount):
     float
         Latest FX conversion rate or None in case of error
     """
+
     url = f"{BASE_URL}/latest?amount={amount}&from={from_currency}&to={to_currency}"
     code, response = get_url(url)
     if code == 200:
@@ -114,12 +117,34 @@ def get_rate_trend(from_currency: str, to_currency: str, years: int) -> dict:
     dict
         Dictionary containing dates and their corresponding rates
     """
-    url = f"{BASE_URL}/{years}y?from={from_currency}&to={to_currency}"
-    code, response = get_url(url)
-    if code == 200:
-        print(f"API call successful. Response: {response}")
-        data = json.loads(response)
-        rates = data["rates"]
-        return rates
-    else:
-        return {}
+    end_date = datetime.date.today()
+    year = end_date.year
+    month = ((end_date.month - 1) // 3) * 3 + 1
+
+    # Bước 1: sinh trước danh sách các ngày cần fetch (không gọi API ở đây)
+    quarter_dates = []
+    for i in range(years * 4):
+        quarter_dates.append(datetime.date(year, month, 1))
+        month -= 3
+        if month <= 0:
+            month += 12
+            year -= 1
+
+    # Bước 2: gọi API song song bằng thread pool
+    trend_data = {}
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        future_to_date = {
+            executor.submit(
+                get_historical_rate, from_currency, to_currency,
+                d.strftime("%Y-%m-%d"), 1
+            ): d
+            for d in quarter_dates
+        }
+        for future in as_completed(future_to_date):
+            d = future_to_date[future]
+            rate = future.result()
+            if rate is not None:
+                trend_data[d.strftime("%Y-%m-%d")] = rate
+
+    # Bước 3: sort lại theo ngày trước khi trả về — QUAN TRỌNG (giải thích bên dưới)
+    return dict(sorted(trend_data.items()))
