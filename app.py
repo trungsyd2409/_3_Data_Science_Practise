@@ -17,13 +17,3 @@ from currency import reverse_rate, round_rate, format_output
 # Add a date selector (calendar)
 
 # Add a button to get and display the historical rate for selected date, currencies and amount
-
-
-
-
-
-
-
-
-
-
