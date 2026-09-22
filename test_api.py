@@ -1,4 +1,4 @@
-from api import get_url
-
-status_code, response_text = get_url("https://api.frankfurter.app/currencies")
-print(status_code, response_text)
+from frankfurter import get_rate_trend
+rates = get_rate_trend("USD", "AUD", 10)
+for date, rate in rates.items():
+    print(f"Date: {date}, Rate: {rate}")

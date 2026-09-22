@@ -21,4 +21,4 @@ def get_url(url: str) -> (int, str):
         response = requests.get(url)
         return response.status_code, response.text
     except requests.exceptions.RequestException as e:
-        return 500, "Error occurred while calling the API"
+        return 500, f"Error occurred while calling the API endpoint: {e}"

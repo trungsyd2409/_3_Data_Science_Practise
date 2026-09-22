@@ -3,6 +3,7 @@ import json
 
 BASE_URL = "https://api.frankfurter.app"
 
+
 def get_currencies_list():
     """
     Function that will call the relevant API endpoint from Frankfurter in order to get the list of available currencies.
@@ -19,7 +20,14 @@ def get_currencies_list():
     list
         List of available currencies or None in case of error
     """
-    
+    code, response = get_url(f"{BASE_URL}/currencies")
+    if code == 200:
+        currencies_dict = json.loads(response)
+        currency_list = list(currencies_dict.keys())
+        return currency_list
+    else:
+        return None
+
 
 def get_latest_rates(from_currency, to_currency, amount):
     """
@@ -44,7 +52,16 @@ def get_latest_rates(from_currency, to_currency, amount):
     float
         Latest FX conversion rate or None in case of error
     """
-    
+    url = f"{BASE_URL}/latest?amount={amount}&from={from_currency}&to={to_currency}"
+    code, response = get_url(url)
+    if code == 200:
+        data = json.loads(response)
+        date = data["date"]
+        rate = data["rates"][to_currency]
+        return date, rate
+    else:
+        return None, None
+
 
 def get_historical_rate(from_currency, to_currency, from_date, amount):
     """
@@ -69,6 +86,16 @@ def get_historical_rate(from_currency, to_currency, from_date, amount):
     float
         Latest FX conversion rate or None in case of error
     """
+    url = f"{BASE_URL}/{from_date}?amount={amount}&from={from_currency}&to={to_currency}"
+    code, response = get_url(url)
+    if code == 200:
+        data = json.loads(response)
+        rate = data["rates"][to_currency]
+        return rate
+    else:
+        return None
+
+
 def get_rate_trend(from_currency: str, to_currency: str, years: int) -> dict:
     """
     Fetches historical rates for the past N years on a quarterly basis and returns a dictionary with dates as keys and rates as values.
@@ -87,3 +114,12 @@ def get_rate_trend(from_currency: str, to_currency: str, years: int) -> dict:
     dict
         Dictionary containing dates and their corresponding rates
     """
+    url = f"{BASE_URL}/{years}y?from={from_currency}&to={to_currency}"
+    code, response = get_url(url)
+    if code == 200:
+        print(f"API call successful. Response: {response}")
+        data = json.loads(response)
+        rates = data["rates"]
+        return rates
+    else:
+        return {}
